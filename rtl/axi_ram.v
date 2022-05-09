@@ -42,7 +42,15 @@ module axi_ram #
     // Width of ID signal
     parameter ID_WIDTH = 8,
     // Extra pipeline register on output
-    parameter PIPELINE_OUTPUT = 0
+    parameter PIPELINE_OUTPUT = 0,
+    
+    
+    //ADDED PARAMETERS
+    
+    // Valid address width
+    parameter VALID_ADDR_WIDTH = ADDR_WIDTH - $clog2(STRB_WIDTH),
+    // True if memory must be erased at matches
+    parameter ERASE_MEMORY = 1
 )
 (
     input  wire                   clk,
@@ -85,7 +93,6 @@ module axi_ram #
     input  wire                   s_axi_rready
 );
 
-parameter VALID_ADDR_WIDTH = ADDR_WIDTH - $clog2(STRB_WIDTH);
 parameter WORD_WIDTH = STRB_WIDTH;
 parameter WORD_SIZE = DATA_WIDTH/WORD_WIDTH;
 
@@ -168,7 +175,7 @@ integer i, j;
 initial begin
     // two nested loops for smaller number of iterations per loop
     // workaround for synthesizer complaints about large loop counts
-    for (i = 0; i < 2**VALID_ADDR_WIDTH; i = i + 2**(VALID_ADDR_WIDTH/2)) begin
+    for (i = 0; i < 2**VALID_ADDR_WIDTH && ERASE_MEMORY; i = i + 2**(VALID_ADDR_WIDTH/2)) begin
         for (j = i; j < i + 2**(VALID_ADDR_WIDTH/2); j = j + 1) begin
             mem[j] = 0;
         end
